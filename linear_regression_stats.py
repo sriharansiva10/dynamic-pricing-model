@@ -23,7 +23,17 @@ linear_regression=list(map(func,head_csv['fuel_price']))
 #stop the plotting if the correlation is less than 0.6 or greater than -0.6
 if abs(r) > 0.6 :
     plt.scatter(head_csv['fuel_price'],head_csv['rental_price'],color='#1010e3')
-    plt.plot(head_csv['fuel_price'],linear_regression,color='#13e80c')
-    plt.show()
+    # plt.plot(head_csv['fuel_price'],linear_regression,color='#13e80c')
+    plt.subplot(2,1,1)
 else :
     print("no correlation between fuel price and rental price")
+
+slope,intercept,r,p,stderr=stats.linregress(head_csv['fuel_price'],head_csv['demand_score'])
+
+linear_regression=list(map(func,head_csv['fuel_price']))
+
+if abs(r) > 0.6 :
+    plt.scatter(head_csv['fuel_price'],head_csv['demand_score'])
+    # plt.plot(head_csv['fuel_price'],linear_regression,color='#13e80c')
+    plt.subplot(2,1,2)
+    plt.show()
