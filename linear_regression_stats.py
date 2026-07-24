@@ -4,7 +4,7 @@ from scipy import stats
 import numpy as np
 
 #readind the data from the csv file
-head_csv=pd.read_csv('ebike_dynamic_pricing_dataset_without_weather.csv').head(1000)
+head_csv=pd.read_csv('ebike_dynamic_pricing_dataset_without_weather.csv').head(100)
 
 # plot for first ten rows
 
