@@ -1,2 +1,0 @@
-Dynamic pricing (also known as surge, demand, or time-based pricing) is a flexible revenue management strategy where businesses adjust product or service prices in real-time based on market demand, supply levels, and consumer behavior. Instead of fixed rates, algorithms analyze vast amounts of market data to optimize margins and inventory
-#require some time and peoples
