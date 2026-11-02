@@ -111,19 +111,38 @@ def train_model(
 ):
     features = df.drop(columns=[target])
     labels = df[target]
-    X_train, X_test, y_train, y_test = split_data(
+    X_train_full, X_test, y_train_full, y_test = split_data(
         features, labels, test_size, random_state, time_column
     )
+
+    # Reserve the final test set for evaluation only. When early stopping is
+    # enabled, split the training partition again so model selection never
+    # sees the holdout.
+    if early_stopping_rounds > 0:
+        val_size = 0.2
+        X_train, X_val, y_train, y_val = split_data(
+            X_train_full, y_train_full, val_size, random_state, time_column
+        )
+    else:
+        X_train, y_train = X_train_full, y_train_full
+        X_val, y_val = None, None
+
     # A raw timestamp is an identifier-like value, not a stable model feature.
     # It is used for the chronological split and excluded unless callers first
     # derive durable calendar features (hour, weekday, season, and so on).
     if time_column:
         X_train = X_train.drop(columns=[time_column])
         X_test = X_test.drop(columns=[time_column])
+        if X_val is not None:
+            X_val = X_val.drop(columns=[time_column])
 
     preprocessor = build_preprocessor(X_train)
     X_train_transformed = preprocessor.fit_transform(X_train)
-    X_test_transformed = preprocessor.transform(X_test)
+    if X_val is not None:
+        X_val_transformed = preprocessor.transform(X_val)
+    else:
+        X_val_transformed = None
+
     default_params = {
         "n_estimators": 400,
         "max_depth": 4,
@@ -139,7 +158,10 @@ def train_model(
     default_params.update(xgb_params)
 
     estimator = xgb.XGBRegressor(**default_params)
-    estimator.fit(X_train_transformed, y_train, eval_set=[(X_test_transformed, y_test)], verbose=False)
+    fit_kwargs = {"verbose": False}
+    if X_val_transformed is not None:
+        fit_kwargs["eval_set"] = [(X_val_transformed, y_val)]
+    estimator.fit(X_train_transformed, y_train, **fit_kwargs)
     pipeline = Pipeline([("preprocessor", preprocessor), ("model", estimator)])
     return pipeline, X_train, X_test, y_train, y_test
 
